@@ -1,0 +1,10 @@
+{
+  "hosted-zone:account=226334087406:domainName=em-dev.org:region=eu-central-1": {
+    "Id": "/hostedzone/Z09665269LB1ROB5QSWV",
+    "Name": "em-dev.org."
+  },
+  "hosted-zone:account=226334087406:domainName=em-dev.org:region=us-east-1": {
+    "Id": "/hostedzone/Z09665269LB1ROB5QSWV",
+    "Name": "em-dev.org."
+  }
+}
