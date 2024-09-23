@@ -39,26 +39,27 @@ const template = `
   <body>
     <h1>ToDos</h1>
 
-    <button
-      hx-get="/todos"
-      hx-target="#todos-list"
-      hx-indicator="#loading-indicator"
-    >
-      Refresh
-    </button>
+    <div>
+      <button
+        hx-get="/todos"
+        hx-target="#todos-list"
+        hx-indicator="#loading-indicator"
+      >
+        Refresh
+      </button>
+      <span id="loading-indicator" class="htmx-indicator">Loading...</span>
+    </div>
 
     <form
       hx-post="/todos"
       hx-target="#todos-list"
       hx-swap="afterbegin"
       hx-indicator="#loading-indicator"
-      hx-on:htmx:afterRequest="this.reset()"
+      hx-on::after-request="this.reset()"
     >
       <input type="text" name="text" placeholder="Enter a new ToDo" required />
       <button type="submit">Add</button>
     </form>
-
-    <div id="loading-indicator" class="htmx-indicator">Loading...</div>
 
     ${toDosSectionTemplate}
   </body>
