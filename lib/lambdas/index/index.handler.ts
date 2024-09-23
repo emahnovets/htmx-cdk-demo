@@ -52,6 +52,7 @@ const template = `
       hx-target="#todos-list"
       hx-swap="afterbegin"
       hx-indicator="#loading-indicator"
+      hx-on:htmx:afterRequest="this.reset()"
     >
       <input type="text" name="text" placeholder="Enter a new ToDo" required />
       <button type="submit">Add</button>
