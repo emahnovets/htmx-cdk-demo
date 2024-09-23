@@ -29,7 +29,10 @@ import { ARecord, HostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import type { Construct } from 'constructs';
 
 interface ToDoLambdas {
+  indexLambda: NodejsFunction;
   getAllLambda: NodejsFunction;
+  createToDoLambda: NodejsFunction;
+  deleteToDoLambda: NodejsFunction;
 }
 
 interface ToDosStackProps extends StackProps {
@@ -71,9 +74,6 @@ export class ToDosStack extends Stack {
 
   private initializeLambdas(): ToDoLambdas {
     const defaultLambdaProps: NodejsFunctionProps = {
-      bundling: {
-        externalModules: ['aws-sdk'],
-      },
       depsLockFilePath: join(__dirname, 'lambdas', 'package-lock.json'),
       environment: {
         PRIMARY_KEY: this.#TABLE_PARTITION_KEY,
@@ -87,11 +87,29 @@ export class ToDosStack extends Stack {
       ...defaultLambdaProps,
     });
 
-    return { getAllLambda };
+    const indexLambda = new NodejsFunction(this, 'indexFunction', {
+      entry: join(__dirname, 'lambdas', 'index', 'index.handler.ts'),
+      ...defaultLambdaProps,
+    });
+
+    const createToDoLambda = new NodejsFunction(this, 'createToDoFunction', {
+      entry: join(__dirname, 'lambdas', 'create', 'create.handler.ts'),
+      ...defaultLambdaProps,
+    });
+
+    const deleteToDoLambda = new NodejsFunction(this, 'deleteToDoFunction', {
+      entry: join(__dirname, 'lambdas', 'delete', 'delete.handler.ts'),
+      ...defaultLambdaProps,
+    });
+
+    return { getAllLambda, indexLambda, createToDoLambda, deleteToDoLambda };
   }
 
   private initializeLambdaPermisisons(lambdas: ToDoLambdas, todosTable: Table) {
     todosTable.grantReadData(lambdas.getAllLambda);
+    todosTable.grantReadData(lambdas.indexLambda);
+    todosTable.grantReadWriteData(lambdas.createToDoLambda);
+    todosTable.grantReadWriteData(lambdas.deleteToDoLambda);
   }
 
   private initializeApiGateway(props: ToDosStackProps): RestApi {
@@ -121,13 +139,31 @@ export class ToDosStack extends Stack {
     return api;
   }
 
-  private initializeApiEndpoints(api: RestApi, { getAllLambda }: ToDoLambdas) {
+  private initializeApiEndpoints(
+    api: RestApi,
+    {
+      getAllLambda,
+      indexLambda,
+      createToDoLambda,
+      deleteToDoLambda,
+    }: ToDoLambdas,
+  ) {
+    const indexIntegration = new LambdaIntegration(indexLambda);
     const getAllIntegration = new LambdaIntegration(getAllLambda);
+    const createIntegration = new LambdaIntegration(createToDoLambda);
+    const deleteIntegration = new LambdaIntegration(deleteToDoLambda);
+
+    api.root.addMethod('GET', indexIntegration);
+    this.addCorsOptions(api.root);
 
     const items = api.root.addResource(this.#TODOS_API_RESOURCE);
     items.addMethod('GET', getAllIntegration);
-
+    items.addMethod('POST', createIntegration);
     this.addCorsOptions(items);
+
+    const singleItem = items.addResource('{id}');
+    singleItem.addMethod('DELETE', deleteIntegration);
+    this.addCorsOptions(singleItem);
   }
 
   private addCorsOptions(apiResource: IResource) {
