@@ -31,7 +31,7 @@ HTMX works by adding attributes to your HTML elements that tell HTMX how to inte
 
 # HTMX Demo
 
-* [todos.em-dev.org](https://todos.em-dev.org)
+* [todos.demo.emahnovets.dev](https://todos.demo.emahnovets.dev)
 * [github.com/emahnovets/htmx-cdk-demo](https://github.com/emahnovets/htmx-cdk-demo)
 
 ---
@@ -66,5 +66,5 @@ Could be a good fit for simple applications with minimal interactivity.
 
 Links:
 - [HTMX](https://htmx.org/)
-- [Demo App](https://todos.em-dev.org)
+- [Demo App](https://todos.demo.emahnovets.dev)
 - [Demo App Github](https://github.com/emahnovets/htmx-cdk-demo)
